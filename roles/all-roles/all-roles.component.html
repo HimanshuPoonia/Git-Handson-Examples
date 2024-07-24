@@ -1,0 +1,74 @@
+<header-page-section heading="Roles">
+    <ng-container *ngIf="permission && permission[1] && permission[1].view">
+        <button class="btn btn-secondary" routerLink="/users">Users</button>
+    </ng-container>
+    <ng-container *ngIf="permission && permission[0] && permission[0].add">
+        <button class="btn btn-primary" routerLink="/roles/create-role/-1">
+            + Add Role
+        </button>
+    </ng-container>
+</header-page-section>
+<div
+    class="app-container"
+    *ngIf="permission && permission[0].view; else showDefaultpermissionMsg"
+>
+    <!-- primeng table start  -->
+    <div class="app-table">
+        <app-data-table
+        [tableCaption]="false"
+            [showSelectAllCheckbox]="false"
+            [actionItems]="actionItems"
+            [headers]="tableHeaders"
+            [data]="roles"
+            [enablePagination]="enablePagination"
+            (pageChange)="initTable($event)"
+            [totalCount]="totalRecords"
+        ></app-data-table>
+        <ng-template #actionItems let-data="data">
+            <ng-container
+                *ngIf="
+                    permission &&
+                    permission[0] &&
+                    permissionService.canEdit(permission[0], data.createdBy)
+                "
+            >
+                <a
+                    tooltipPosition="top"
+                    [showDelay]="200"
+                    pTooltip="Edit Role"
+                    class="btn-transparent btn btn-sm btn-light"
+                    routerLink="/roles/create-role/{{ data.id }}"
+                >
+                    <span class="fa fa-pencil"></span>
+                </a>
+            </ng-container>
+            <ng-container
+                *ngIf="
+                    permission &&
+                    permission[0] &&
+                    permissionService.canDelete(
+                        permission[0],
+                        data.createdBy
+                    ) &&
+                    data.isDefaultRole !== 1
+                "
+            >
+                <a
+                    tooltipPosition="top"
+                    [showDelay]="200"
+                    pTooltip="Delete Role"
+                    class="btn-transparent btn btn-sm btn-light"
+                    (click)="deleteRole(data.id)"
+                >
+                    <span class="fa fa-trash-can"></span>
+                </a>
+            </ng-container>
+        </ng-template>
+    </div>
+    <!-- primeng table end  -->
+</div>
+<ng-template #showDefaultpermissionMsg>
+    <div *ngIf="permission && !permission[0].view">
+        <app-no-access></app-no-access>
+    </div>
+</ng-template>

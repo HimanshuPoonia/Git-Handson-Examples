@@ -1,0 +1,675 @@
+<header-page-section heading="Create Permission Sets" [breadcrumbMenu]="[{name:'Roles', path: '/roles'}]">
+</header-page-section>
+<div class="app-container">
+    <div class="app-card-">
+        <div class="app-card-body-">
+            <ul class="nav custom-tabs border-bottom">
+                <li>
+                    <a [ngClass]="{ active: viewPage === 'permission' }" href="javascript:void(0)"
+                        (click)="changeScreen('permission')"> Permission</a>
+                </li>
+                <li *ngIf="
+                        showNavigation &&
+                        roleDetails && roleDetails.is_default_role === 0
+                    ">
+                    <a [ngClass]="{ active: viewPage === 'navigation' }" href="javascript:void(0)"
+                        (click)="changeScreen('navigation')"> Navigation</a>
+                </li>
+            </ul>
+            <div id="permission" *ngIf="viewPage === 'permission'">
+                <div class="row g-3 mb-3">
+                    <div class="col-12 text-danger font-weight-regular" *ngIf="
+                            permissionId &&
+                            permissionId != '-1' &&
+                            roleDetails &&
+                            roleDetails.is_default_role === 1
+                        ">
+                        * This is System generated Role. This cannot be edited.
+                    </div>
+                    <div class="col-sm-4">
+                        <label for="name" class="form-label">Name <span class="text-danger">*</span></label> <input
+                            type="text" class="form-control" [(ngModel)]="roleDetails.name" [ngClass]="{
+                                'is-invalid':
+                                    errors && errors.name && errors.name !== ''
+                            }" />
+                        <div class="invalid-feedback d-block" *ngIf="errors && errors.name && errors.name !== ''">
+                            {{ errors.name }}
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        <label for="description" class="form-label">Description <span
+                                class="text-danger">*</span></label> <textarea class="form-control" rows="1" [ngClass]="{
+                                'is-invalid':
+                                    errors &&
+                                    errors.description &&
+                                    errors.description !== ''
+                            }" [(ngModel)]="roleDetails.description"></textarea>
+                        <div class="invalid-feedback d-block" *ngIf="
+                                errors &&
+                                errors.description &&
+                                errors.description !== ''
+                            ">
+                            {{ errors.description }}
+                        </div>
+                    </div>
+                    <div class="col-md-12" *ngIf="isSuperAdmin">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" [(ngModel)]="roleDetails.mfa" value=""
+                                id="flexCheckChecked" checked> <label class="form-check-label" for="flexCheckChecked">
+                                2FA
+                                <app-tooltip
+                                    text="If you select/enable this option, the users associated with this Role type will have to login with 2FA token generated on Google Authenticator app installed on his/her Mobile."></app-tooltip>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="mb-1">
+                            <strong class="fw-semibold">Role Instructions</strong>
+                        </div>
+                        <div class="mb-1">
+                            *<strong class="fw-semibold">View</strong> (User can view their own inserted records
+                            only.)<br /> *<strong class="fw-semibold">Add</strong> (User can Add records.) *<strong
+                                class="fw-semibold">Edit</strong> (User can Edit all records.) *<strong
+                                class="fw-semibold">Delete</strong> (User can Delete all records.) *<strong
+                                class="fw-semibold">View All</strong> (User can view all records.)
+                        </div>
+                        <div class="mb-3">
+                            *<strong class="fw-semibold">Please Note:</strong> User can Edit and Delete their own
+                            inserted records by default. No Edit or Delete Permission required.
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <ng-container *ngFor="let allmod of allmods; index as r">
+                        <div class="permission-card col-md-12">
+                            <div class="card permission-set rounded-3 overflow-hidden">
+                                <div class="bg-body-tertiary rounded-top-3 p-3">
+                                    <div class="permission-header d-flex d-md-grid align-items-center gap-3">
+                                        <div>
+
+                                            <div class="align-items-start d-flex  permission-title">
+                                                <div class="form-check form-check-inline my-0 me-2 py-0">
+                                                    <input type="checkbox" name="" id="{{ allmod.key + r }}"
+                                                        [checked]="allmod.select" (change)="
+                                                        checkUncheckPermission(
+                                                                $event.target.checked,
+                                                                r, 'select'
+                                                            )
+                                                        " class="form-check-input" /> <label for="{{ allmod.key + r }}"
+                                                        class="form-check-label fw-medium">
+                                                        <!-- Select All -->
+                                                    </label>
+                                                </div>
+                                                <div>
+                                                    <h3 class="fs-17 fw-semibold mb-0"> {{ getModuleName(allmod.key) }}
+                                                    </h3>
+                                                    <a class="cursor-pointer text-decoration-none fs-15 mt-2 d-inline-block"
+                                                        data-bs-toggle="collapse"
+                                                        [attr.data-bs-target]="'#tbcontent-fhb-c'+r"
+                                                        aria-expanded="false" aria-controls="collapseExample">
+                                                        View all permissions
+                                                        <span class="toggle-permission-icon ms-2">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="1rem"
+                                                                height="1rem" fill="currentColor"
+                                                                class="bi bi-chevron-down" viewBox="0 0 16 16">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" />
+                                                            </svg>
+                                                        </span>
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <!-- static checkboxes start  -->
+                                        <div class="text-start">
+                                            <h6>View</h6>
+                                            <div class="form-check">
+                                                <input type="checkbox" name="" id="view{{ allmod.key + r }}"
+                                                    [checked]="allmod.view" (change)="
+                                                    checkUncheckPermission(
+                                                        $event.target.checked,
+                                                        r, 'view'
+                                                    )
+                                                " class="form-check-input" /> <label for="view{{ allmod.key + r }}"
+                                                    class="form-check-label fw-medium">
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="text-start">
+                                            <h6>Add</h6>
+                                            <div class="form-check">
+                                                <input type="checkbox" name="" id="add{{ allmod.key + r }}"
+                                                    [checked]="allmod.add" (change)="
+                                                    checkUncheckPermission(
+                                                        $event.target.checked,
+                                                        r, 'add'
+                                                    )
+                                                " class="form-check-input" /> <label for="add{{ allmod.key + r }}"
+                                                    class="form-check-label fw-medium">
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="text-start">
+                                            <h6>Edit</h6>
+                                            <div class="form-check">
+                                                <input type="checkbox" name="" id="edit{{ allmod.key + r }}"
+                                                    [checked]="allmod.edit" (change)="
+                                                    checkUncheckPermission(
+                                                        $event.target.checked,
+                                                        r, 'edit'
+                                                    )
+                                                " class="form-check-input" /> <label for="edit{{ allmod.key + r }}"
+                                                    class="form-check-label fw-medium">
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-start">
+                                            <h6>Delete</h6>
+                                            <div class="form-check">
+                                                <input type="checkbox" name="" id="delete{{ allmod.key + r }}"
+                                                    [checked]="allmod.delete" (change)="
+                                                    checkUncheckPermission(
+                                                        $event.target.checked,
+                                                        r, 'delete'
+                                                    )
+                                                " class="form-check-input" /> <label for="delete{{ allmod.key + r }}"
+                                                    class="form-check-label fw-medium">
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <!-- static checkboxes end  -->
+
+                                    </div>
+
+                                </div>
+                                <div class="permission-body  p-3 collapse" [id]="'tbcontent-fhb-c'+ r">
+                                    <div *ngFor="
+                                            let mod of allmod.mod;
+                                            index as m; last as Last; first as First
+                                        " class="permission-list d-grid gap-3"
+                                        [ngClass]="!First && !Last ? 'mt-3 pt-3 border-opacity-10 border-top': ''">
+                                        <div class="permission-name fs-16 mb-3 mb-md-0 text-capitalize"
+                                            *ngIf="mod.key !=='select'">
+                                            {{getPageName(mod.key)}} Permissions
+                                        </div>
+                                        <div class="d-grid-column">
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].view}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].view
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox" [name]="'view' + r + m"
+                                                    [id]="'view' + r + m" [checked]="mod['mod'].view" (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'view'
+                                                        )
+                                                    " /> <label class="form-check-label"
+                                                    for="{{ 'view' + r + m }}">View</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].add}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].add
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox" [name]="'add' + r + m"
+                                                    [id]="'add' + r + m" [checked]="mod['mod'].add" (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'add'
+                                                        )
+                                                    " /> <label class="form-check-label"
+                                                    for="{{ 'add' + r + m }}">Add</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].update}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].update
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox"
+                                                    [name]="'update' + r + m" [id]="'update' + r + m" [checked]="
+                                                        mod['mod'].update
+                                                    " (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'update'
+                                                        )
+                                                    " /> <label class="form-check-label"
+                                                    for="{{ 'update' + r + m }}">Update</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].edit}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].edit
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox" [name]="'edit' + r + m"
+                                                    [id]="'edit' + r + m" [checked]="mod['mod'].edit" (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'edit'
+                                                        )
+                                                    " /> <label class="form-check-label"
+                                                    for="{{ 'edit' + r + m }}">Edit</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].manageUser}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].manageUser
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox" [name]="
+                                                        'manageUser' + r + m
+                                                    " [id]="'manageUser' + r + m" [checked]="
+                                                        mod['mod'].manageUser
+                                                    " (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'manageUser'
+                                                        )
+                                                    " /> <label class="form-check-label" for="{{
+                                                        'manageUser' + r + m
+                                                    }}">Manage User</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].delete}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].delete
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox"
+                                                    [name]="'delete' + r + m" [id]="'delete' + r + m" [checked]="
+                                                        mod['mod'].delete
+                                                    " (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'delete'
+                                                        )
+                                                    " /> <label class="form-check-label"
+                                                    for="{{ 'delete' + r + m }}">Delete</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].viewall}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].viewall
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox"
+                                                    [name]="'viewall' + r + m" [id]="'viewall' + r + m" [checked]="
+                                                        mod['mod'].viewall
+                                                    " (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'viewall'
+                                                        )
+                                                    " /> <label class="form-check-label" for="{{
+                                                        'viewall' + r + m
+                                                    }}">View All</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].formShare}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].formShare
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox"
+                                                    [name]="'formShare' + r + m" [id]="'formShare' + r + m" [checked]="
+                                                        mod['mod'].formShare
+                                                    " (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'formShare'
+                                                        )
+                                                    " /> <label class="form-check-label" for="{{
+                                                        'formShare' + r + m
+                                                    }}">Form Share</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].formEmbed}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].formEmbed
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox"
+                                                    [name]="'formEmbed' + r + m" [id]="'formEmbed' + r + m" [checked]="
+                                                        mod['mod'].formEmbed
+                                                    " (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'formEmbed'
+                                                        )
+                                                    " /> <label class="form-check-label" for="{{
+                                                        'formEmbed' + r + m
+                                                    }}">Form Embed</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].filters}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].filters
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox"
+                                                    [name]="'filters' + r + m" [id]="'filters' + r + m" [checked]="
+                                                        mod['mod'].filters
+                                                    " (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'filters'
+                                                        )
+                                                    " /> <label class="form-check-label" for="{{
+                                                        'filters' + r + m
+                                                    }}">Filters</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].configure}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].configure
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox"
+                                                    [name]="'configure' + r + m" [id]="'configure' + r + m" [checked]="
+                                                        mod['mod'].configure
+                                                    " (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'configure'
+                                                        )
+                                                    " /> <label class="form-check-label" for="{{
+                                                        'configure' + r + m
+                                                    }}">Configure</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].permission}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].permission
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox" [name]="
+                                                        'permission' + r + m
+                                                    " [id]="'permission' + r + m" [checked]="
+                                                        mod['mod'].permission
+                                                    " (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'permission'
+                                                        )
+                                                    " /> <label class="form-check-label" for="{{
+                                                        'permission' + r + m
+                                                    }}">Permission</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].clone}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].clone
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox" [name]="'clone' + r + m"
+                                                    [id]="'clone' + r + m" [checked]="mod['mod'].clone" (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'clone'
+                                                        )
+                                                    " /> <label class="form-check-label"
+                                                    for="{{ 'clone' + r + m }}">Clone</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].move}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].move
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox" [name]="'move' + r + m"
+                                                    [id]="'move' + r + m" [checked]="mod['mod'].move" (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'move'
+                                                        )
+                                                    " /> <label class="form-check-label"
+                                                    for="{{ 'move' + r + m }}">Move</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].refresh}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].refresh
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox"
+                                                    [name]="'refresh' + r + m" [id]="'refresh' + r + m" [checked]="
+                                                        mod['mod'].refresh
+                                                    " (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'refresh'
+                                                        )
+                                                    " /> <label class="form-check-label" for="{{
+                                                        'refresh' + r + m
+                                                    }}">Refresh</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].advanceSettingAdd}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].advanceSettingAdd
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox"
+                                                    [name]="'advanceSettingAdd' + r + m"
+                                                    [id]="'advanceSettingAdd' + r + m" [checked]="
+                                                        mod['mod'].advanceSettingAdd
+                                                    " (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'advanceSettingAdd'
+                                                        )
+                                                    " /> <label class="form-check-label" for="{{
+                                                        'advanceSettingAdd' + r + m
+                                                    }}">Add Advance Settings</label>
+                                            </div>
+                                            <div class="permission-column form-check"
+                                                [ngClass]="{'checked--': mod['mod'].advanceSettingEdit}" *ngIf="
+                                                    isTypeOfPermission(
+                                                        mod['mod'].advanceSettingEdit
+                                                    )
+                                                ">
+                                                <input class="form-check-input" type="checkbox"
+                                                    [name]="'advanceSettingEdit' + r + m"
+                                                    [id]="'advanceSettingEdit' + r + m" [checked]="
+                                                        mod['mod'].advanceSettingEdit
+                                                    " (change)="
+                                                        updateValue(
+                                                            $event.target
+                                                                .checked,
+                                                            r,
+                                                            m,
+                                                            'advanceSettingEdit'
+                                                        )
+                                                    " /> <label class="form-check-label" for="{{
+                                                        'advanceSettingEdit' + r + m
+                                                    }}">Edit Advance Setting</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+                <div class="row" *ngIf="roleDetails && roleDetails.is_default_role === 0">
+                    <div class="col-sm-12 mt-2">
+                        <button class="btn btn-primary" (click)="save()">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="viewPage === 'navigation'">
+                <div class="accordion mb-4" id="navigation" *ngFor="let item of allMenuList; let i = index">
+                    <div class="accordion-item">
+                        <div class="accordion-header" id="heading{{ i }}">
+                            <button type="button" class="accordion-button" data-bs-toggle="collapse"
+                                [attr.data-bs-target]="'#collapse' + i" aria-expanded="true"
+                                [attr.aria-controls]="'collapse' + i">
+                                {{ item.name }}
+                            </button>
+                        </div>
+                        <div [id]="'collapse' + i" class="collapse" [class.show]="i === 0"
+                            aria-labelledby="heading{{ i }}" data-bs-parent="#navigation">
+                            <div class="accordion-body">
+                                <div class="mat-list-item dragable-item" *ngFor="
+                                        let component of item.menuItems;
+                                        index as j
+                                    ">
+                                    <div class="navigation-list">
+                                        <div class="menu-row px-3 py-2" [ngClass]="{ 'mt-0': j === 0 }" *ngIf="j == 0">
+                                            <div class="font-weight-regular">
+                                                Icon
+                                            </div>
+                                            <div class="font-weight-regular">
+                                                Name
+                                            </div>
+                                            <div class="font-weight-regular">
+                                                Action
+                                            </div>
+                                        </div>
+                                        <div class="bg-body-tertiary mb-1 menu-row px-3 py-2 rounded-2">
+                                            <div *ngIf="component.faClass">
+                                                <svg class="feather">
+                                                    <use [attr.href]="
+                                                            'assets/feather-sprite.svg#' +
+                                                            component.faClass
+                                                        " />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                {{ component.name }}
+                                            </div>
+                                            <div>
+                                                <ng-container>
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" [checked]="
+                                                                getChecked(
+                                                                    component.roles
+                                                                )
+                                                            " (change)="
+                                                                selectMenu(
+                                                                    $event
+                                                                        .target
+                                                                        .checked,
+                                                                    component.tempId
+                                                                )
+                                                            " id="{{
+                                                                component.tempId
+                                                            }}" /> <label class="form-check-label" for="{{
+                                                                component.tempId
+                                                            }}"></label>
+                                                    </div>
+                                                </ng-container>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mat-list-item dragable-item ms-4" *ngFor="
+                                            let newItem of component.components;
+                                            index as k
+                                        ">
+                                        <div class="navigation-list">
+                                            <div class="bg-body-tertiary mb-1 menu-row px-3 py-2 rounded-2">
+                                                <div *ngIf="newItem.faClass">
+                                                    <svg class="feather">
+                                                        <use [attr.href]="
+                                                                'assets/feather-sprite.svg#' +
+                                                                newItem.faClass
+                                                            " />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    {{ newItem.name }}
+                                                </div>
+                                                <div>
+                                                    <ng-container>
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input" type="checkbox" [checked]="
+                                                                    getChecked(
+                                                                        newItem.roles
+                                                                    )
+                                                                " (change)="
+                                                                    submenuSelect(
+                                                                        $event
+                                                                            .target
+                                                                            .checked,
+                                                                        newItem.tempId
+                                                                    )
+                                                                " id="{{
+                                                                    newItem.tempId
+                                                                }}" /> <label class="form-check-label" for="{{
+                                                                    newItem.tempId
+                                                                }}"></label>
+                                                        </div>
+                                                    </ng-container>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary" (click)="onSubmit()">
+                    Update
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
